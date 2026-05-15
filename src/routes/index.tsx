@@ -227,41 +227,52 @@ function Dashboard() {
 
             <section className="grid gap-4 lg:grid-cols-2">
               <ChartCard title="Headcount by Team">
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={agg.byTeam}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                    <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
-                    <Bar dataKey="value" fill="var(--color-chart-1)" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartCard>
-
-              <ChartCard title="Performance Score Distribution">
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={agg.scoreDist}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={agg.byTeam} margin={{ top: 24, right: 12, left: 0, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} interval={0} angle={-15} textAnchor="end" height={50} />
+                    <YAxis tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} allowDecimals={false} />
                     <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
                     <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                      {agg.scoreDist.map((_, i) => (
+                      {agg.byTeam.map((_, i) => (
                         <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                       ))}
+                      <LabelList dataKey="value" position="top" style={{ fontSize: 11, fill: "var(--color-foreground)", fontWeight: 600 }} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
 
-              <ChartCard title="Allocation by Project (Top 10)">
-                <ResponsiveContainer width="100%" height={320}>
-                  <BarChart data={agg.byProject} layout="vertical" margin={{ left: 24 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                    <XAxis type="number" tick={{ fontSize: 12 }} allowDecimals={false} />
-                    <YAxis dataKey="name" type="category" tick={{ fontSize: 12 }} width={110} />
+              <ChartCard title="Performance Score Distribution">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={agg.scoreDist} margin={{ top: 24, right: 12, left: 0, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} />
+                    <YAxis tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} allowDecimals={false} />
                     <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
-                    <Bar dataKey="value" fill="var(--color-chart-2)" radius={[0, 6, 6, 0]} />
+                    <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                      {agg.scoreDist.map((_, i) => (
+                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                      <LabelList dataKey="value" position="top" style={{ fontSize: 11, fill: "var(--color-foreground)", fontWeight: 600 }} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="Allocation by Sub Team (Top 10)">
+                <ResponsiveContainer width="100%" height={340}>
+                  <BarChart data={agg.byProject} layout="vertical" margin={{ top: 8, right: 36, left: 12, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} allowDecimals={false} />
+                    <YAxis dataKey="name" type="category" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} width={130} />
+                    <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
+                    <Bar dataKey="value" radius={[0, 6, 6, 0]}>
+                      {agg.byProject.map((_, i) => (
+                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                      <LabelList dataKey="value" position="right" style={{ fontSize: 11, fill: "var(--color-foreground)", fontWeight: 600 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -276,6 +287,8 @@ function Dashboard() {
                       innerRadius={55}
                       outerRadius={110}
                       paddingAngle={2}
+                      label={({ value }) => value}
+                      labelLine={false}
                     >
                       {agg.byDesignation.map((_, i) => (
                         <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
