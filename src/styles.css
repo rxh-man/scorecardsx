@@ -98,5 +98,11 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-feature-settings: "cv11", "ss01";
+    background-image:
+      linear-gradient(to right, oklch(0.55 0.24 27 / 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(0.55 0.24 27 / 0.06) 1px, transparent 1px),
+      radial-gradient(circle at 1px 1px, oklch(0.55 0.24 27 / 0.18) 1px, transparent 0);
+    background-size: 80px 80px, 80px 80px, 24px 24px;
+    background-position: 0 0, 0 0, 0 0;
   }
 }
