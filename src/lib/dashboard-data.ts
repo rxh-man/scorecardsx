@@ -98,6 +98,12 @@ export interface Aggregates {
   byProject: { name: string; value: number }[];
   byDesignation: { name: string; value: number }[];
   scoreDist: { name: string; value: number }[];
+  avgScoreByTeam: { name: string; value: number; scored: number; missing: number }[];
+  successionByTeam: { name: string; covered: number; missing: number; total: number }[];
+  topByTeam: { name: string; value: number }[];
+  topByDesignation: { name: string; value: number }[];
+  successionRiskRows: ResourceRow[];
+  missingScoreRows: ResourceRow[];
 }
 
 export function aggregate(rows: ResourceRow[]): Aggregates {
@@ -119,6 +125,66 @@ export function aggregate(rows: ResourceRow[]): Aggregates {
     const k = r.score == null ? "N/A" : String(Math.round(r.score));
     scoreBuckets.set(k, (scoreBuckets.get(k) ?? 0) + 1);
   }
+  // Average score by team (only counts scored entries; tracks missing)
+  const teamMap = new Map<string, { sum: number; scored: number; missing: number }>();
+  for (const r of rows) {
+    const t = r.team || "—";
+    const cur = teamMap.get(t) ?? { sum: 0, scored: 0, missing: 0 };
+    if (r.score != null) {
+      cur.sum += r.score;
+      cur.scored += 1;
+    } else {
+      cur.missing += 1;
+    }
+    teamMap.set(t, cur);
+  }
+  const avgScoreByTeam = [...teamMap.entries()]
+    .map(([name, v]) => ({
+      name,
+      value: v.scored ? Number((v.sum / v.scored).toFixed(2)) : 0,
+      scored: v.scored,
+      missing: v.missing,
+    }))
+    .sort((a, b) => b.value - a.value);
+
+  // Succession coverage by team
+  const succMap = new Map<string, { covered: number; missing: number }>();
+  for (const r of rows) {
+    const t = r.team || "—";
+    const cur = succMap.get(t) ?? { covered: 0, missing: 0 };
+    if (r.succession) cur.covered += 1;
+    else cur.missing += 1;
+    succMap.set(t, cur);
+  }
+  const successionByTeam = [...succMap.entries()]
+    .map(([name, v]) => ({ name, ...v, total: v.covered + v.missing }))
+    .sort((a, b) => b.total - a.total);
+
+  // Top performers (score >=4) breakdowns
+  const tops = rows.filter((r) => (r.score ?? 0) >= 4);
+  const topByTeamMap = new Map<string, number>();
+  const topByDesigMap = new Map<string, number>();
+  for (const r of tops) {
+    const t = r.team || "—";
+    const d = r.designation || "—";
+    topByTeamMap.set(t, (topByTeamMap.get(t) ?? 0) + 1);
+    topByDesigMap.set(d, (topByDesigMap.get(d) ?? 0) + 1);
+  }
+  const topByTeam = [...topByTeamMap.entries()]
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+  const topByDesignation = [...topByDesigMap.entries()]
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+
+  // Score vs Target Role gap — has a target role but score < 3 (succession risk)
+  const successionRiskRows = rows
+    .filter((r) => r.targetRole && r.score != null && r.score < 3)
+    .sort((a, b) => (a.score ?? 0) - (b.score ?? 0));
+
+  // Missing entries (no score) — flagged for leaders
+  const missingScoreRows = rows.filter((r) => r.score == null);
+
   return {
     total: rows.length,
     teams: new Set(rows.map((r) => r.team).filter(Boolean)).size,
@@ -127,11 +193,17 @@ export function aggregate(rows: ResourceRow[]): Aggregates {
     avgScore: scored.length
       ? scored.reduce((s, r) => s + (r.score as number), 0) / scored.length
       : 0,
-    topPerformers: rows.filter((r) => (r.score ?? 0) >= 4).length,
+    topPerformers: tops.length,
     successors: rows.filter((r) => r.succession).length,
     byTeam: tally("team"),
     byProject: tally("project").slice(0, 10),
     byDesignation: tally("designation").slice(0, 8),
     scoreDist: [...scoreBuckets.entries()].map(([name, value]) => ({ name, value })),
+    avgScoreByTeam,
+    successionByTeam,
+    topByTeam,
+    topByDesignation,
+    successionRiskRows,
+    missingScoreRows,
   };
 }
