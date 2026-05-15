@@ -23,7 +23,10 @@ import {
   TrendingUp,
   Trash2,
   FileSpreadsheet,
+  Lock,
 } from "lucide-react";
+import eandLogo from "@/assets/eand-logo.png";
+import { BUILTIN_DATASET } from "@/lib/builtin-dataset";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -85,7 +88,7 @@ function Dashboard() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const d = loadDataset();
+    const d = loadDataset() ?? BUILTIN_DATASET;
     if (d) {
       setRows(d.rows);
       setMeta(d.meta);
@@ -145,9 +148,13 @@ function Dashboard() {
         <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary via-destructive to-primary" />
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
-              <Layers className="h-5 w-5" />
-            </div>
+            <img
+              src={eandLogo}
+              alt="e& logo"
+              className="h-11 w-auto select-none"
+              draggable={false}
+            />
+            <div className="hidden h-10 w-px bg-border sm:block" />
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-primary">
                 Executive Dashboard
@@ -190,6 +197,15 @@ function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+        <div className="flex items-start gap-3 rounded-md border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
+          <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+          <p className="text-foreground">
+            <span className="font-semibold text-primary">Confidential — e& internal use only.</span>{" "}
+            This dashboard contains restricted workforce information. Access is limited to recipients of this private link;
+            do not forward, share, screenshot, or distribute its contents to anyone else.
+          </p>
+        </div>
+
         {error && (
           <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {error}
