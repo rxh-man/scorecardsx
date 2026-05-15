@@ -203,7 +203,7 @@ function Dashboard() {
             <section className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
               <Kpi label="Total Resources" value={agg.total} icon={Users} />
               <Kpi label="Teams" value={agg.teams} icon={Layers} />
-              <Kpi label="Projects" value={agg.projects} icon={Briefcase} />
+              <Kpi label="Sub Teams" value={agg.projects} icon={Briefcase} />
               <Kpi
                 label="Avg Score"
                 value={agg.avgScore ? agg.avgScore.toFixed(2) : "—"}
