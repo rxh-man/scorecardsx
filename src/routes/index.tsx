@@ -23,7 +23,10 @@ import {
   TrendingUp,
   Trash2,
   FileSpreadsheet,
+  Lock,
 } from "lucide-react";
+import eandLogo from "@/assets/eand-logo.png";
+import { BUILTIN_DATASET } from "@/lib/builtin-dataset";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
