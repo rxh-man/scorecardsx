@@ -5,6 +5,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -27,6 +28,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -71,6 +79,7 @@ function Dashboard() {
   const [rows, setRows] = useState<ResourceRow[]>([]);
   const [meta, setMeta] = useState<DatasetMeta | null>(null);
   const [search, setSearch] = useState("");
+  const [scoreFilter, setScoreFilter] = useState<string>("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -86,14 +95,21 @@ function Dashboard() {
   const agg = useMemo(() => aggregate(rows), [rows]);
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return rows;
-    const q = search.toLowerCase();
-    return rows.filter((r) =>
-      [r.employeeName, r.employeeNumber, r.team, r.project, r.designation, r.targetRole]
+    const q = search.trim().toLowerCase();
+    return rows.filter((r) => {
+      if (scoreFilter !== "all") {
+        if (scoreFilter === "na") {
+          if (r.score != null) return false;
+        } else if (Math.round(r.score ?? -1) !== Number(scoreFilter)) {
+          return false;
+        }
+      }
+      if (!q) return true;
+      return [r.employeeName, r.employeeNumber, r.team, r.project, r.designation, r.targetRole]
         .filter(Boolean)
-        .some((v) => v.toLowerCase().includes(q)),
-    );
-  }, [rows, search]);
+        .some((v) => v.toLowerCase().includes(q));
+    });
+  }, [rows, search, scoreFilter]);
 
   const handleFile = async (file: File) => {
     setError(null);
@@ -125,20 +141,28 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-primary text-primary-foreground">
+      <header className="border-b-2 border-primary/30 bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/70 relative">
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary via-destructive to-primary" />
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-6">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] opacity-70">Executive Dashboard</p>
-            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              NOC &amp; FM Resource Delivery
-            </h1>
-            {meta && (
-              <p className="mt-1 text-xs opacity-75">
-                <FileSpreadsheet className="mr-1 inline h-3.5 w-3.5" />
-                {meta.fileName} · {meta.rowCount} records · uploaded{" "}
-                {new Date(meta.uploadedAt).toLocaleString()}
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
+              <Layers className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-primary">
+                Executive Dashboard
               </p>
-            )}
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+                NOC &amp; FM Resource Delivery
+              </h1>
+              {meta && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  <FileSpreadsheet className="mr-1 inline h-3.5 w-3.5" />
+                  {meta.fileName} · {meta.rowCount} records · uploaded{" "}
+                  {new Date(meta.uploadedAt).toLocaleString()}
+                </p>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -152,20 +176,12 @@ function Dashboard() {
                 e.target.value = "";
               }}
             />
-            <Button
-              variant="secondary"
-              onClick={() => fileRef.current?.click()}
-              disabled={loading}
-            >
+            <Button onClick={() => fileRef.current?.click()} disabled={loading}>
               <Upload className="mr-2 h-4 w-4" />
               {loading ? "Processing…" : meta ? "Upload new sheet" : "Upload sheet"}
             </Button>
             {meta && (
-              <Button
-                variant="ghost"
-                className="text-primary-foreground hover:bg-primary-foreground/10"
-                onClick={reset}
-              >
+              <Button variant="outline" onClick={reset}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
@@ -187,7 +203,7 @@ function Dashboard() {
             <section className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
               <Kpi label="Total Resources" value={agg.total} icon={Users} />
               <Kpi label="Teams" value={agg.teams} icon={Layers} />
-              <Kpi label="Projects" value={agg.projects} icon={Briefcase} />
+              <Kpi label="Sub Teams" value={agg.projects} icon={Briefcase} />
               <Kpi
                 label="Avg Score"
                 value={agg.avgScore ? agg.avgScore.toFixed(2) : "—"}
@@ -211,41 +227,52 @@ function Dashboard() {
 
             <section className="grid gap-4 lg:grid-cols-2">
               <ChartCard title="Headcount by Team">
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={agg.byTeam}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                    <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
-                    <Bar dataKey="value" fill="var(--color-chart-1)" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartCard>
-
-              <ChartCard title="Performance Score Distribution">
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={agg.scoreDist}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={agg.byTeam} margin={{ top: 24, right: 12, left: 0, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} interval={0} angle={-15} textAnchor="end" height={50} />
+                    <YAxis tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} allowDecimals={false} />
                     <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
                     <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                      {agg.scoreDist.map((_, i) => (
+                      {agg.byTeam.map((_, i) => (
                         <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                       ))}
+                      <LabelList dataKey="value" position="top" style={{ fontSize: 11, fill: "var(--color-foreground)", fontWeight: 600 }} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
 
-              <ChartCard title="Allocation by Project (Top 10)">
-                <ResponsiveContainer width="100%" height={320}>
-                  <BarChart data={agg.byProject} layout="vertical" margin={{ left: 24 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                    <XAxis type="number" tick={{ fontSize: 12 }} allowDecimals={false} />
-                    <YAxis dataKey="name" type="category" tick={{ fontSize: 12 }} width={110} />
+              <ChartCard title="Performance Score Distribution">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={agg.scoreDist} margin={{ top: 24, right: 12, left: 0, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} />
+                    <YAxis tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} allowDecimals={false} />
                     <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
-                    <Bar dataKey="value" fill="var(--color-chart-2)" radius={[0, 6, 6, 0]} />
+                    <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                      {agg.scoreDist.map((_, i) => (
+                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                      <LabelList dataKey="value" position="top" style={{ fontSize: 11, fill: "var(--color-foreground)", fontWeight: 600 }} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="Allocation by Sub Team (Top 10)">
+                <ResponsiveContainer width="100%" height={340}>
+                  <BarChart data={agg.byProject} layout="vertical" margin={{ top: 8, right: 36, left: 12, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} allowDecimals={false} />
+                    <YAxis dataKey="name" type="category" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} width={130} />
+                    <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
+                    <Bar dataKey="value" radius={[0, 6, 6, 0]}>
+                      {agg.byProject.map((_, i) => (
+                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                      <LabelList dataKey="value" position="right" style={{ fontSize: 11, fill: "var(--color-foreground)", fontWeight: 600 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -260,6 +287,8 @@ function Dashboard() {
                       innerRadius={55}
                       outerRadius={110}
                       paddingAngle={2}
+                      label={({ value }) => value}
+                      labelLine={false}
                     >
                       {agg.byDesignation.map((_, i) => (
                         <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
@@ -284,14 +313,35 @@ function Dashboard() {
 
             <section>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
-                  <CardTitle className="text-base">Resource Roster</CardTitle>
-                  <Input
-                    placeholder="Search name, project, team…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="max-w-xs"
-                  />
+                <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+                  <CardTitle className="text-base">
+                    Resource Roster
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                      ({filtered.length} of {rows.length})
+                    </span>
+                  </CardTitle>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Select value={scoreFilter} onValueChange={setScoreFilter}>
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue placeholder="Filter score" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All scores</SelectItem>
+                        <SelectItem value="5">Score 5</SelectItem>
+                        <SelectItem value="4">Score 4</SelectItem>
+                        <SelectItem value="3">Score 3</SelectItem>
+                        <SelectItem value="2">Score 2</SelectItem>
+                        <SelectItem value="1">Score 1</SelectItem>
+                        <SelectItem value="na">Not scored</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      placeholder="Search name, team…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="max-w-xs"
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="max-h-[520px] overflow-auto rounded-md border">
@@ -301,7 +351,7 @@ function Dashboard() {
                           <TableHead>Employee</TableHead>
                           <TableHead>Team</TableHead>
                           <TableHead>Designation</TableHead>
-                          <TableHead>Project</TableHead>
+                          <TableHead>Sub Team</TableHead>
                           <TableHead>Target Role</TableHead>
                           <TableHead className="text-center">Score</TableHead>
                           <TableHead>Succession</TableHead>
