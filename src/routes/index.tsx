@@ -24,8 +24,17 @@ import {
   Trash2,
   FileSpreadsheet,
   Lock,
+  Download,
+  FileText,
 } from "lucide-react";
 import eandLogo from "@/assets/eand-logo.png";
+import { exportCSV, exportPDF } from "@/lib/export-audit";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { BUILTIN_DATASET } from "@/lib/builtin-dataset";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -187,6 +196,26 @@ function Dashboard() {
               <Upload className="mr-2 h-4 w-4" />
               {loading ? "Processing…" : meta ? "Upload new sheet" : "Upload sheet"}
             </Button>
+            {rows.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    <Download className="mr-2 h-4 w-4" />
+                    Export audit view
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => exportCSV(rows, agg, meta)}>
+                    <FileSpreadsheet className="mr-2 h-4 w-4" />
+                    Download as CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportPDF(rows, agg, meta)}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Download as PDF
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
             {meta && (
               <Button variant="outline" onClick={reset}>
                 <Trash2 className="h-4 w-4" />
