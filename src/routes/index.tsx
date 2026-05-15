@@ -148,9 +148,13 @@ function Dashboard() {
         <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary via-destructive to-primary" />
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
-              <Layers className="h-5 w-5" />
-            </div>
+            <img
+              src={eandLogo}
+              alt="e& logo"
+              className="h-11 w-auto select-none"
+              draggable={false}
+            />
+            <div className="hidden h-10 w-px bg-border sm:block" />
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-primary">
                 Executive Dashboard
