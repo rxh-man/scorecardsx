@@ -326,6 +326,154 @@ function Dashboard() {
               </ChartCard>
             </section>
 
+            <section className="grid gap-4 lg:grid-cols-2">
+              <ChartCard title="Average Score by Team">
+                {agg.avgScoreByTeam.every((t) => t.scored === 0) ? (
+                  <MissingNotice text="No scores recorded for any team — entries missing from leaders." />
+                ) : (
+                  <>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={agg.avgScoreByTeam} margin={{ top: 24, right: 12, left: 0, bottom: 8 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                        <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} interval={0} angle={-15} textAnchor="end" height={50} />
+                        <YAxis tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} domain={[0, 5]} />
+                        <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
+                        <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                          {agg.avgScoreByTeam.map((t, i) => (
+                            <Cell key={i} fill={t.value >= 4 ? "var(--color-success)" : t.value >= 3 ? "var(--color-warning)" : t.value > 0 ? "var(--color-destructive)" : "var(--color-muted)"} />
+                          ))}
+                          <LabelList dataKey="value" position="top" formatter={(v: number) => (v ? v.toFixed(2) : "—")} style={{ fontSize: 11, fill: "var(--color-foreground)", fontWeight: 600 }} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                    {agg.avgScoreByTeam.some((t) => t.missing > 0) && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Missing scores —{" "}
+                        {agg.avgScoreByTeam.filter((t) => t.missing > 0).map((t) => `${t.name}: ${t.missing}`).join(" · ")}{" "}
+                        (entries missing from leaders)
+                      </p>
+                    )}
+                  </>
+                )}
+              </ChartCard>
+
+              <ChartCard title="Succession Coverage by Team">
+                {agg.successionByTeam.every((t) => t.covered === 0) ? (
+                  <MissingNotice text="No succession plans on record — entries missing from leaders." />
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={agg.successionByTeam} margin={{ top: 24, right: 12, left: 0, bottom: 8 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} interval={0} angle={-15} textAnchor="end" height={50} />
+                      <YAxis tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} allowDecimals={false} />
+                      <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
+                      <Bar dataKey="covered" stackId="s" fill="var(--color-success)" name="Successor identified">
+                        <LabelList dataKey="covered" position="insideTop" style={{ fontSize: 10, fill: "white", fontWeight: 600 }} formatter={(v: number) => (v ? v : "")} />
+                      </Bar>
+                      <Bar dataKey="missing" stackId="s" fill="var(--color-destructive)" name="No successor" radius={[6, 6, 0, 0]}>
+                        <LabelList dataKey="missing" position="top" style={{ fontSize: 11, fill: "var(--color-foreground)", fontWeight: 600 }} formatter={(v: number) => (v ? v : "")} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </ChartCard>
+
+              <ChartCard title="Top Performers by Team (Score ≥ 4)">
+                {!agg.topByTeam.length ? (
+                  <MissingNotice text="No top performers identified — score entries missing from leaders." />
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={agg.topByTeam} margin={{ top: 24, right: 12, left: 0, bottom: 8 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} interval={0} angle={-15} textAnchor="end" height={50} />
+                      <YAxis tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} allowDecimals={false} />
+                      <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                        {agg.topByTeam.map((_, i) => (
+                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                        ))}
+                        <LabelList dataKey="value" position="top" style={{ fontSize: 11, fill: "var(--color-foreground)", fontWeight: 600 }} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </ChartCard>
+
+              <ChartCard title="Top Performers by Designation (Score ≥ 4)">
+                {!agg.topByDesignation.length ? (
+                  <MissingNotice text="No top performers identified — score entries missing from leaders." />
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={agg.topByDesignation} layout="vertical" margin={{ top: 8, right: 36, left: 12, bottom: 8 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
+                      <XAxis type="number" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} allowDecimals={false} />
+                      <YAxis dataKey="name" type="category" tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} width={140} />
+                      <Tooltip cursor={{ fill: "var(--color-muted)" }} contentStyle={tooltipStyle} />
+                      <Bar dataKey="value" radius={[0, 6, 6, 0]}>
+                        {agg.topByDesignation.map((_, i) => (
+                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                        ))}
+                        <LabelList dataKey="value" position="right" style={{ fontSize: 11, fill: "var(--color-foreground)", fontWeight: 600 }} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </ChartCard>
+            </section>
+
+            <section>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">
+                    Score vs. Target Role Gap — Succession Risk
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                      (employees with a target role but score &lt; 3)
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {!agg.successionRiskRows.length ? (
+                    <MissingNotice text="No succession-risk gaps detected. If you expected entries here, scores or target roles may be missing from leaders." />
+                  ) : (
+                    <div className="max-h-[360px] overflow-auto rounded-md border">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-secondary">
+                          <TableRow>
+                            <TableHead>Employee</TableHead>
+                            <TableHead>Team</TableHead>
+                            <TableHead>Current Role</TableHead>
+                            <TableHead>Target Role</TableHead>
+                            <TableHead className="text-center">Score</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {agg.successionRiskRows.map((r, i) => (
+                            <TableRow key={`risk-${r.employeeNumber}-${i}`}>
+                              <TableCell>
+                                <div className="font-medium">{r.employeeName}</div>
+                                <div className="text-xs text-muted-foreground">{r.employeeNumber}</div>
+                              </TableCell>
+                              <TableCell><Badge variant="outline">{r.team || "—"}</Badge></TableCell>
+                              <TableCell className="text-sm">{r.designation}</TableCell>
+                              <TableCell className="text-sm">{r.targetRole}</TableCell>
+                              <TableCell className="text-center"><ScorePill score={r.score} /></TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                  {agg.missingScoreRows.length > 0 && (
+                    <p className="mt-3 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-foreground">
+                      <span className="font-semibold">Heads up:</span> {agg.missingScoreRows.length}{" "}
+                      employee{agg.missingScoreRows.length === 1 ? "" : "s"} have no score recorded —
+                      entries missing from leaders. These are excluded from the risk view above.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </section>
+
             <section>
               <Card>
                 <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
