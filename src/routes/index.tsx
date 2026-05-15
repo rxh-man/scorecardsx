@@ -639,6 +639,14 @@ function ScorePill({ score }: { score: number | null }) {
   );
 }
 
+function MissingNotice({ text }: { text: string }) {
+  return (
+    <div className="flex items-center justify-center rounded-md border border-dashed border-warning/40 bg-warning/5 px-4 py-10 text-center text-sm text-muted-foreground">
+      {text}
+    </div>
+  );
+}
+
 function EmptyState({ onUpload }: { onUpload: () => void }) {
   return (
     <Card className="border-dashed">
