@@ -98,6 +98,12 @@ export interface Aggregates {
   byProject: { name: string; value: number }[];
   byDesignation: { name: string; value: number }[];
   scoreDist: { name: string; value: number }[];
+  avgScoreByTeam: { name: string; value: number; scored: number; missing: number }[];
+  successionByTeam: { name: string; covered: number; missing: number; total: number }[];
+  topByTeam: { name: string; value: number }[];
+  topByDesignation: { name: string; value: number }[];
+  successionRiskRows: ResourceRow[];
+  missingScoreRows: ResourceRow[];
 }
 
 export function aggregate(rows: ResourceRow[]): Aggregates {
