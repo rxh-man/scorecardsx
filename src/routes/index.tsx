@@ -141,20 +141,28 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-primary text-primary-foreground">
+      <header className="border-b-2 border-primary/30 bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/70 relative">
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary via-destructive to-primary" />
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-6">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] opacity-70">Executive Dashboard</p>
-            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              NOC &amp; FM Resource Delivery
-            </h1>
-            {meta && (
-              <p className="mt-1 text-xs opacity-75">
-                <FileSpreadsheet className="mr-1 inline h-3.5 w-3.5" />
-                {meta.fileName} · {meta.rowCount} records · uploaded{" "}
-                {new Date(meta.uploadedAt).toLocaleString()}
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
+              <Layers className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-primary">
+                Executive Dashboard
               </p>
-            )}
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+                NOC &amp; FM Resource Delivery
+              </h1>
+              {meta && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  <FileSpreadsheet className="mr-1 inline h-3.5 w-3.5" />
+                  {meta.fileName} · {meta.rowCount} records · uploaded{" "}
+                  {new Date(meta.uploadedAt).toLocaleString()}
+                </p>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -168,20 +176,12 @@ function Dashboard() {
                 e.target.value = "";
               }}
             />
-            <Button
-              variant="secondary"
-              onClick={() => fileRef.current?.click()}
-              disabled={loading}
-            >
+            <Button onClick={() => fileRef.current?.click()} disabled={loading}>
               <Upload className="mr-2 h-4 w-4" />
               {loading ? "Processing…" : meta ? "Upload new sheet" : "Upload sheet"}
             </Button>
             {meta && (
-              <Button
-                variant="ghost"
-                className="text-primary-foreground hover:bg-primary-foreground/10"
-                onClick={reset}
-              >
+              <Button variant="outline" onClick={reset}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
