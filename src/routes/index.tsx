@@ -351,7 +351,7 @@ function Dashboard() {
                           <TableHead>Employee</TableHead>
                           <TableHead>Team</TableHead>
                           <TableHead>Designation</TableHead>
-                          <TableHead>Project</TableHead>
+                          <TableHead>Sub Team</TableHead>
                           <TableHead>Target Role</TableHead>
                           <TableHead className="text-center">Score</TableHead>
                           <TableHead>Succession</TableHead>
