@@ -201,8 +201,7 @@ function Dashboard() {
           <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
           <p className="text-foreground">
             <span className="font-semibold text-primary">Confidential — e& internal use only.</span>{" "}
-            This dashboard contains restricted workforce information. Access is limited to recipients of this private link;
-            do not forward, share, screenshot, or distribute its contents to anyone else.
+            This dashboard contains restricted workforce information. Access is limited to recipients of this private link.
           </p>
         </div>
 
