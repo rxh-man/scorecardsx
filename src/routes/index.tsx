@@ -79,6 +79,7 @@ function Dashboard() {
   const [rows, setRows] = useState<ResourceRow[]>([]);
   const [meta, setMeta] = useState<DatasetMeta | null>(null);
   const [search, setSearch] = useState("");
+  const [scoreFilter, setScoreFilter] = useState<string>("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
