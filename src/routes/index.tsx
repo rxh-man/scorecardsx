@@ -88,7 +88,7 @@ function Dashboard() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const d = loadDataset();
+    const d = loadDataset() ?? BUILTIN_DATASET;
     if (d) {
       setRows(d.rows);
       setMeta(d.meta);
