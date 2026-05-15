@@ -24,8 +24,17 @@ import {
   Trash2,
   FileSpreadsheet,
   Lock,
+  Download,
+  FileText,
 } from "lucide-react";
 import eandLogo from "@/assets/eand-logo.png";
+import { exportCSV, exportPDF } from "@/lib/export-audit";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { BUILTIN_DATASET } from "@/lib/builtin-dataset";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
