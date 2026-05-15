@@ -95,14 +95,21 @@ function Dashboard() {
   const agg = useMemo(() => aggregate(rows), [rows]);
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return rows;
-    const q = search.toLowerCase();
-    return rows.filter((r) =>
-      [r.employeeName, r.employeeNumber, r.team, r.project, r.designation, r.targetRole]
+    const q = search.trim().toLowerCase();
+    return rows.filter((r) => {
+      if (scoreFilter !== "all") {
+        if (scoreFilter === "na") {
+          if (r.score != null) return false;
+        } else if (Math.round(r.score ?? -1) !== Number(scoreFilter)) {
+          return false;
+        }
+      }
+      if (!q) return true;
+      return [r.employeeName, r.employeeNumber, r.team, r.project, r.designation, r.targetRole]
         .filter(Boolean)
-        .some((v) => v.toLowerCase().includes(q)),
-    );
-  }, [rows, search]);
+        .some((v) => v.toLowerCase().includes(q));
+    });
+  }, [rows, search, scoreFilter]);
 
   const handleFile = async (file: File) => {
     setError(null);
