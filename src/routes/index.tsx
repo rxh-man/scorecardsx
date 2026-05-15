@@ -197,6 +197,15 @@ function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+        <div className="flex items-start gap-3 rounded-md border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
+          <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+          <p className="text-foreground">
+            <span className="font-semibold text-primary">Confidential — e& internal use only.</span>{" "}
+            This dashboard contains restricted workforce information. Access is limited to recipients of this private link;
+            do not forward, share, screenshot, or distribute its contents to anyone else.
+          </p>
+        </div>
+
         {error && (
           <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {error}
