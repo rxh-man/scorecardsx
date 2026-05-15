@@ -313,14 +313,35 @@ function Dashboard() {
 
             <section>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
-                  <CardTitle className="text-base">Resource Roster</CardTitle>
-                  <Input
-                    placeholder="Search name, project, team…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="max-w-xs"
-                  />
+                <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+                  <CardTitle className="text-base">
+                    Resource Roster
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                      ({filtered.length} of {rows.length})
+                    </span>
+                  </CardTitle>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Select value={scoreFilter} onValueChange={setScoreFilter}>
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue placeholder="Filter score" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All scores</SelectItem>
+                        <SelectItem value="5">Score 5</SelectItem>
+                        <SelectItem value="4">Score 4</SelectItem>
+                        <SelectItem value="3">Score 3</SelectItem>
+                        <SelectItem value="2">Score 2</SelectItem>
+                        <SelectItem value="1">Score 1</SelectItem>
+                        <SelectItem value="na">Not scored</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      placeholder="Search name, team…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="max-w-xs"
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="max-h-[520px] overflow-auto rounded-md border">
